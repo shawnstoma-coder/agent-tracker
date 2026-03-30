@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Tracker — Shawn Toma</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f4;color:#1a1a1a}
+.app{max-width:960px;margin:0 auto;padding:1rem}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+h1{font-size:20px;font-weight:700}
+h3{font-size:14px;font-weight:600;margin-bottom:10px}
+button{padding:8px 18px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:13px;font-family:inherit}
+button:hover{background:#f0f0f0}
+.btnp{background:#1a1a1a!important;color:#fff!important;border-color:#1a1a1a!important}
+.btnp:hover{background:#333!important}
+.bdg{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600}
+.bon{background:#EAF3DE;color:#3B6D11}.blow{background:#FAEEDA;color:#854F0B}
+.boff{background:#FCEBEB;color:#A32D2D}.bdone{background:#E6F1FB;color:#185FA5}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px;font-size:11px;color:#888;border-bottom:1px solid #eee;white-space:nowrap}
+td{padding:8px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.tile{padding:12px;border-radius:10px;border:1px solid #e5e5e5;cursor:pointer;text-align:center;transition:all .15s}
+.tile:hover{border-color:#999;background:#f9f9f9}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;margin:0 auto 7px}
+.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.met{background:#f8f8f8;border-radius:8px;padding:.85rem 1rem}
+.ml{font-size:11px;color:#888;margin-bottom:4px}
+.mv{font-size:22px;font-weight:700}
+.lbr{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.lbr:last-child{border-bottom:none}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.fg label{font-size:13px;color:#555}
+.fg input{padding:9px 11px;border-radius:8px;border:1px solid #ddd;font-size:14px;font-family:inherit;width:100%}
+.fg input:focus{outline:none;border-color:#999}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pw{display:flex;flex-direction:column;align-items:center;gap:16px;padding:2.5rem 1rem}
+.pi{font-size:26px;letter-spacing:12px;text-align:center;width:150px;border:1px solid #ddd;border-radius:8px;padding:10px;font-family:inherit}
+.pi:focus{outline:none;border-color:#999}
+.tb{display:flex;border-bottom:1px solid #e0e0e0;margin-bottom:1rem}
+.t{padding:8px 16px;font-size:13px;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px}
+.ta{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:600}
+.ok{background:#EAF3DE;border-radius:8px;padding:13px 16px;color:#3B6D11;font-size:14px;margin-bottom:1rem}
+.flag{background:#FCEBEB;border-radius:8px;padding:10px 14px;color:#A32D2D;font-size:13px;margin-bottom:8px}
+select{padding:6px 10px;border-radius:8px;border:1px solid #ddd;font-size:13px;font-family:inherit;background:#fff;cursor:pointer}
+@media(max-width:620px){.tc{grid-template-columns:1fr}.mets{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+var PIN = "1234";
+var DRB = [
+  {name:"Ajla Ramic",      today_D:52,  yesterday_D:250, wtd_D:1126, mtd_D:4969},
+  {name:"Matthew Somoo",   today_D:24,  yesterday_D:66,  wtd_D:625,  mtd_D:4609},
+  {name:"Carson Yakish",   today_D:5,   yesterday_D:306, wtd_D:882,  mtd_D:3136},
+  {name:"Nevena Nikolic",  today_D:0,   yesterday_D:0,   wtd_D:0,    mtd_D:0},
+  {name:"Monika Hrescak",  today_D:0,   yesterday_D:0,   wtd_D:0,    mtd_D:0},
+  {name:"Robert Kalaj",    today_D:0,   yesterday_D:0,   wtd_D:0,    mtd_D:0},
+  {name:"Loua Farunia",    today_D:0,   yesterday_D:246, wtd_D:1052, mtd_D:4207},
+  {name:"Jelena Lazarevic",today_D:0,   yesterday_D:51,  wtd_D:134,  mtd_D:571},
+  {name:"Tom Ohansians",   today_D:0,   yesterday_D:30,  wtd_D:98,   mtd_D:423},
+  {name:"Kacela Vereen",   today_D:0,   yesterday_D:71,  wtd_D:101,  mtd_D:106}
+];
+var CL=[["#E1F5EE","#085041"],["#E6F1FB","#0C447C"],["#FAEEDA","#633806"],
+  ["#FBEAF0","#72243E"],["#EAF3DE","#27500A"],["#FAECE7","#712B13"],
+  ["#EEEDFE","#3C3489"],["#FCEBEB","#791F1F"],["#E1F5EE","#085041"],["#E6F1FB","#0C447C"]];
+var S={view:"home",step:"pick",dt:"snap",lp:"today",ag:null,pin:"",pe:"",mu:false,
+  f:{ap:"",sh:"",sa:"",pr:""},en:{}};
+
+function ini(n){return n.split(" ").map(function(w){return w[0];}).join("").toUpperCase().slice(0,2);}
+function ds(d){return d>=50?"on":d>=10?"low":"off";}
+function sl(s){return{on:"Working",low:"Low activity",off:"Not dialing"}[s];}
+function sc(s){return{on:"bon",low:"blow",off:"boff"}[s];}
+function dk(p){return{today:"today_D",yesterday:"yesterday_D",wtd:"wtd_D",mtd:"mtd_D"}[p]||"today_D";}
+function fm(n){return"$"+Number(n).toLocaleString();}
+function mxv(a,k){var m=0;for(var i=0;i<a.length;i++){if(a[i][k]>m)m=a[i][k];}return m||1;}
+function srt(a,k){return a.slice().sort(function(x,y){return y[k]-x[k];});}
+function bc(d){return d>=50?"#1D9E75":d>=10?"#EF9F27":"#E24B4A";}
+function save(){try{localStorage.setItem("tracker_en",JSON.stringify(S.en));}catch(e){}}
+function load(){try{var d=localStorage.getItem("tracker_en");if(d)S.en=JSON.parse(d);}catch(e){}}
+function render(){document.getElementById("app").innerHTML=
+  S.view==="home"?rHome():S.view==="entry"?rEntry():S.mu?rDash():rPin();}
+function go(v){S.view=v;if(v==="entry")S.step="pick";render();}
+function pickAg(n){S.ag=n;S.step="form";var e=S.en[n];
+  S.f=e?{ap:e.appts,sh:e.shows,sa:e.sales,pr:e.premium}:{ap:"",sh:"",sa:"",pr:""};render();}
+function chkPin(){if(S.pin===PIN){S.mu=true;S.pe="";S.dt="snap";render();}
+  else{S.pe="Incorrect PIN — try again.";render();}}
+function subEntry(){
+  var p={agent:S.ag,appts:parseInt(S.f.ap)||0,shows:parseInt(S.f.sh)||0,
+    sales:parseInt(S.f.sa)||0,premium:parseFloat(S.f.pr)||0};
+  S.en[S.ag]=p;save();S.step="done";render();}
+
+function rHome(){
+  var lg=0;for(var i=0;i<DRB.length;i++){if(S.en[DRB[i].name])lg++;}
+  var sr=srt(DRB,"today_D"),md=mxv(DRB,"today_D");
+  var h='<div class="hdr"><div>'
+    +'<h1>&#128200; Agent Tracker &mdash; Shawn Toma</h1>'
+    +'<div style="font-size:12px;color:#888;margin-top:3px;">'
+    +new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})
+    +'</div></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button onclick="go(\'entry\')">Log numbers</button>'
+    +'<button class="btnp" onclick="go(\'dashboard\')">Manager view</button>'
+    +'</div></div>';
+
+  h+='<div class="card">'
+    +'<div style="font-size:13px;color:#888;margin-bottom:12px;">Today\'s submissions &mdash; '
+    +lg+' of '+DRB.length+' agents logged</div>'
+    +'<div class="grid">';
+  for(var i=0;i<DRB.length;i++){
+    var a=DRB[i],d=S.en[a.name],c=CL[i];
+    h+='<div class="tile" style="'+(d?"background:#E8F5E9;border-color:#81C784;":"")+'"'
+      +' onclick="go(\'entry\');pickAg(\''+a.name+'\')">'
+      +'<div class="av" style="background:'+c[0]+';color:'+c[1]+'">'+ini(a.name)+'</div>'
+      +'<div style="font-size:13px;font-weight:600;">'+a.name.split(" ")[0]+'</div>'
+      +'<div style="font-size:11px;margin-top:3px;color:'+(d?"#2E7D32":"#aaa")+'">'
+      +(d?"&#10003; Logged":"Tap to log")+'</div></div>';
+  }
+  h+='</div></div>';
+
+  h+='<div class="card"><h3>&#128293; Today\'s dial leaderboard</h3>';
+  for(var j=0;j<sr.length;j++){
+    var a=sr[j],p=Math.round(a.today_D/md*100);
+    h+='<div class="lbr">'
+      +'<span style="font-size:12px;color:#aaa;width:20px;font-weight:600">'+(j+1)+'</span>'
+      +'<span style="flex:1;font-weight:600">'+a.name+'</span>'
+      +'<div style="width:90px;height:6px;background:#eee;border-radius:3px;overflow:hidden;margin-right:8px;">'
+      +'<div style="height:100%;width:'+p+'%;background:'+bc(a.today_D)+'"></div></div>'
+      +'<span style="min-width:36px;text-align:right;font-weight:700;">'+a.today_D+'</span>'
+      +'<span class="bdg '+sc(ds(a.today_D))+'" style="margin-left:8px">'+sl(ds(a.today_D))+'</span>'
+      +'</div>';
+  }
+  return h+'</div>';
+}
+
+function rEntry(){
+  if(S.step==="pick"){
+    var sr=srt(DRB,"today_D"),md=mxv(DRB,"today_D");
+    var h='<div class="hdr"><div style="display:flex;align-items:center;gap:10px;">'
+      +'<button onclick="go(\'home\')" style="font-size:13px;">&#8592; Back</button>'
+      +'<h1>Log your numbers</h1></div></div>'
+      +'<div class="tc">'
+      +'<div class="card"><h3>Who are you?</h3>'
+      +'<div style="display:flex;flex-direction:column;gap:8px;">';
+    for(var i=0;i<DRB.length;i++){
+      var a=DRB[i],d=S.en[a.name],c=CL[i];
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;'
+        +'border:1px solid '+(d?"#81C784":"#e5e5e5")+';background:'+(d?"#E8F5E9":"#fff")+';cursor:pointer;"'
+        +' onclick="pickAg(\''+a.name+'\')">'
+        +'<div class="av" style="background:'+c[0]+';color:'+c[1]+';width:34px;height:34px;font-size:11px;flex-shrink:0;">'
+        +ini(a.name)+'</div>'
+        +'<div style="flex:1;font-size:13px;font-weight:600;">'+a.name+'</div>'
+        +(d?'<span class="bdg bdone">Logged</span>':'')
+        +'</div>';
+    }
+    h+='</div></div>';
+    h+='<div class="card"><h3>&#128293; Today\'s leaderboard</h3>';
+    for(var j=0;j<sr.length;j++){
+      var a=sr[j],p=Math.round(a.today_D/md*100);
+      h+='<div class="lbr">'
+        +'<span style="font-size:12px;color:#aaa;width:22px;">#'+(j+1)+'</span>'
+        +'<span style="flex:1;font-size:13px;font-weight:600;">'+a.name.split(" ")[0]+'</span>'
+        +'<div style="width:70px;height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-right:6px;">'
+        +'<div style="height:100%;width:'+p+'%;background:'+bc(a.today_D)+'"></div></div>'
+        +'<span style="font-size:13px;font-weight:700;min-width:28px;text-align:right;">'+a.today_D+'</span>'
+        +'</div>';
+    }
+    return h+'</div></div>';
+  }
+
+  if(S.step==="form"){
+    var idx=0;for(var i=0;i<DRB.length;i++){if(DRB[i].name===S.ag)idx=i;}
+    var c=CL[idx],f=S.f,ex=S.en[S.ag];
+    var sr2=srt(DRB,"today_D"),mx2=mxv(DRB,"today_D");
+    var h='<div class="hdr"><div style="display:flex;align-items:center;gap:10px;">'
+      +'<button onclick="S.step=\'pick\';render()" style="font-size:13px;">&#8592; Back</button>'
+      +'<div class="av" style="background:'+c[0]+';color:'+c[1]+'">'+ini(S.ag)+'</div>'
+      +'<h1>'+S.ag.split(" ")[0]+'</h1></div></div>'
+      +(ex?'<div class="ok">&#9888; You already logged today &mdash; submitting will update your entry.</div>':'')
+      +'<div class="tc">'
+      +'<div class="card"><h3>Daily numbers</h3>'
+      +'<div class="fg"><label>Appointments set</label>'
+      +'<input type="number" min="0" value="'+f.ap+'" oninput="S.f.ap=this.value" placeholder="0"></div>'
+      +'<div class="fg"><label>Appointments shown</label>'
+      +'<input type="number" min="0" value="'+f.sh+'" oninput="S.f.sh=this.value" placeholder="0"></div>'
+      +'<div class="fg"><label>Sales made</label>'
+      +'<input type="number" min="0" value="'+f.sa+'" oninput="S.f.sa=this.value" placeholder="0"></div>'
+      +'<div class="fg"><label>Annual premium ($)</label>'
+      +'<input type="number" min="0" value="'+f.pr+'" oninput="S.f.pr=this.value" placeholder="0"></div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button class="btnp" onclick="subEntry()">Save numbers</button>'
+      +'<button onclick="S.step=\'pick\';render()">Cancel</button>'
+      +'</div></div>';
+    h+='<div class="card"><h3>&#128293; Leaderboard</h3>';
+    for(var j=0;j<sr2.length;j++){
+      var a=sr2[j],me=a.name===S.ag,p=Math.round(a.today_D/mx2*100);
+      h+='<div class="lbr" style="'+(me?"background:#EBF5FF;border-radius:6px;padding:6px 8px;":"")+'">'
+        +'<span style="font-size:12px;color:'+(me?"#185FA5":"#aaa")+';width:22px;">#'+(j+1)+'</span>'
+        +'<span style="flex:1;font-size:13px;font-weight:600;color:'+(me?"#185FA5":"#1a1a1a")+';">'
+        +a.name.split(" ")[0]+(me?" (you)")+'</span>'
+        +'<div style="width:60px;height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-right:6px;">'
+        +'<div style="height:100%;width:'+p+'%;background:'+bc(a.today_D)+'"></div></div>'
+        +'<span style="font-size:13px;font-weight:700;min-width:28px;text-align:right;">'+a.today_D+'</span>'
+        +'</div>';
+    }
+    return h+'</div></div>';
+  }
+
+  return '<div class="ok" style="font-size:16px;">&#10003; Numbers saved for '+S.ag+'!</div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button class="btnp" onclick="S.step=\'pick\';render()">Log another agent</button>'
+    +'<button onclick="go(\'home\')">Back to home</button>'
+    +'</div>';
+}
+
+function rPin(){
+  return '<div class="hdr"><div style="display:flex;align-items:center;gap:10px;">'
+    +'<button onclick="go(\'home\')" style="font-size:13px;">&#8592; Back</button>'
+    +'<h1>Manager access</h1></div></div>'
+    +'<div class="card"><div class="pw">'
+    +'<div style="font-size:15px;color:#555;">Enter your manager PIN</div>'
+    +'<input class="pi" type="password" maxlength="4" placeholder="&#9679;&#9679;&#9679;&#9679;"'
+    +' oninput="S.pin=this.value;if(this.value.length===4)chkPin()">'
+    +'<div style="color:#A32D2D;font-size:13px;min-height:20px;">'+S.pe+'</div>'
+    +'<button class="btnp" style="width:120px;" onclick="chkPin()">Unlock</button>'
+    +'</div></div>';
+}
+
+function rDash(){
+  var h='<div class="hdr"><div style="display:flex;align-items:center;gap:10px;">'
+    +'<button onclick="go(\'home\')" style="font-size:13px;">&#8592; Home</button>'
+    +'<h1>Manager dashboard</h1></div>'
+    +'<button onclick="S.mu=false;go(\'home\')" style="font-size:12px;">Lock</button></div>'
+    +'<div class="tb">'
+    +'<div class="t '+(S.dt==="snap"?"ta":"")+'" onclick="S.dt=\'snap\';render()">Snapshot</div>'
+    +'<div class="t '+(S.dt==="lb"?"ta":"")+'" onclick="S.dt=\'lb\';render()">Leaderboard</div>'
+    +'<div class="t '+(S.dt==="flags"?"ta":"")+'" onclick="S.dt=\'flags\';render()">Flags</div>'
+    +'</div>';
+  return h+(S.dt==="snap"?rSnap():S.dt==="lb"?rLb():rFlags());
+}
+
+function rSnap(){
+  var tot=0,wk=0,nd=0,lc=0;
+  for(var i=0;i<DRB.length;i++){
+    tot+=DRB[i].today_D;
+    if(DRB[i].today_D>=50)wk++;
+    if(DRB[i].today_D===0)nd++;
+  }
+  for(var k in S.en){if(Object.prototype.hasOwnProperty.call(S.en,k))lc++;}
+  var h='<div class="mets">'
+    +'<div class="met"><div class="ml">Total dials today</div><div class="mv">'+tot.toLocaleString()+'</div></div>'
+    +'<div class="met"><div class="ml">Agents working</div><div class="mv">'+wk+' / '+DRB.length+'</div></div>'
+    +'<div class="met"><div class="ml">Not dialing</div><div class="mv" style="color:'+(nd>0?"#A32D2D":"#1a1a1a")+'">'+nd+'</div></div>'
+    +'<div class="met"><div class="ml">Logged today</div><div class="mv">'+lc+' / '+DRB.length+'</div></div>'
+    +'</div>';
+  h+='<div class="card"><table><thead><tr>'
+    +'<th>Agent</th><th>Dials</th><th>Yesterday</th><th>WTD</th><th>MTD</th>'
+    +'<th>Status</th><th>Appts</th><th>Sales</th><th>Premium</th>'
+    +'</tr></thead><tbody>';
+  for(var i=0;i<DRB.length;i++){
+    var a=DRB[i],s=ds(a.today_D),e=S.en[a.name]||{};
+    h+='<tr><td style="font-weight:600;">'+a.name+'</td>'
+      +'<td><strong>'+a.today_D+'</strong></td>'
+      +'<td style="color:#888;">'+a.yesterday_D+'</td>'
+      +'<td style="color:#888;">'+a.wtd_D+'</td>'
+      +'<td style="color:#888;">'+a.mtd_D+'</td>'
+      +'<td><span class="bdg '+sc(s)+'">'+sl(s)+'</span></td>'
+      +'<td style="color:#888;">'+(e.appts!==undefined?e.appts:"&mdash;")+'</td>'
+      +'<td style="color:#888;">'+(e.sales!==undefined?e.sales:"&mdash;")+'</td>'
+      +'<td style="color:#888;">'+(e.premium!==undefined?fm(e.premium):"&mdash;")+'</td>'
+      +'</tr>';
+  }
+  return h+'</tbody></table></div>';
+}
+
+function rLb(){
+  var k=dk(S.lp),sr=srt(DRB,k),md=mxv(DRB,k);
+  var labels={today:"Today",yesterday:"Yesterday",wtd:"Week to date",mtd:"Month to date"};
+  var h='<div class="card">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+    +'<h3 style="margin:0;">Dial leaderboard</h3>'
+    +'<select onchange="S.lp=this.value;render()">';
+  ["today","yesterday","wtd","mtd"].forEach(function(p){
+    h+='<option value="'+p+'" '+(S.lp===p?"selected":"")+'>'+labels[p]+'</option>';
+  });
+  h+='</select></div>';
+  for(var j=0;j<sr.length;j++){
+    var a=sr[j],st=ds(a[k]),p=Math.round(a[k]/md*100),c=CL[j%CL.length];
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;">'
+      +'<span style="font-size:14px;color:#aaa;width:22px;font-weight:700;">'+(j+1)+'</span>'
+      +'<div class="av" style="background:'+c[0]+';color:'+c[1]+';width:32px;height:32px;font-size:11px;flex-shrink:0;">'+ini(a.name)+'</div>'
+      +'<span style="flex:1;font-size:14px;font-weight:600;">'+a.name+'</span>'
+      +'<div style="width:110px;height:7px;background:#eee;border-radius:4px;overflow:hidden;">'
+      +'<div style="height:100%;width:'+p+'%;background:'+bc(a[k])+'"></div></div>'
+      +'<span style="font-size:14px;font-weight:700;min-width:50px;text-align:right;">'+a[k].toLocaleString()+'</span>'
+      +'<span class="bdg '+sc(st)+'">'+sl(st)+'</span>'
+      +'</div>';
+  }
+  return h+'</div>';
+}
+
+function rFlags(){
+  var flags=[];
+  for(var i=0;i<DRB.length;i++){
+    var a=DRB[i];
+    if(a.today_D===0) flags.push({name:a.name,msg:"0 dials today — not working",sev:"danger"});
+    else if(a.today_D<50) flags.push({name:a.name,msg:a.today_D+" dials — low activity",sev:"warn"});
+  }
+  if(flags.length===0){
+    return '<div class="card" style="text-align:center;padding:2rem;">'
+      +'<div style="font-size:32px;margin-bottom:8px;">&#10003;</div>'
+      +'<div style="font-weight:600;font-size:16px;">All agents looking good</div>'
+      +'<div style="font-size:13px;color:#888;margin-top:4px;">No flags today</div>'
+      +'</div>';
+  }
+  var h='<div class="card"><h3>Agents needing attention</h3>';
+  flags.forEach(function(f){
+    h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;">'
+      +'<div style="width:10px;height:10px;border-radius:50%;margin-top:3px;flex-shrink:0;background:'
+      +(f.sev==="danger"?"#E24B4A":"#EF9F27")+'"></div>'
+      +'<div><div style="font-size:14px;font-weight:600;">'+f.name+'</div>'
+      +'<div style="font-size:13px;color:#888;margin-top:2px;">'+f.msg+'</div></div>'
+      +'</div>';
+  });
+  return h+'</div>';
+}
+
+load();
+render();
+</script>
+</body>
+</html>
